@@ -31,7 +31,7 @@ function changelog (pkg) {
     const ts = Date.parse(pkg.changelog[i].date)
     var d = new Date(ts)
     d = d.toString().replace(/([a-zA-Z]*) ([a-zA-Z]*) ([0-9]*) ([0-9]*) ([0-9:]*) GMT(.....) .*/, '$1, $3 $2 $4 $5 $6')
-    log.push(`\n -- ${pkg.maintainer}  ${d}\n`)
+    log.push(`\n -- ${pkg.changelog[i].author || pkg.maintainer}  ${d}\n`)
   }
   log.push('')
   return log
