@@ -13,7 +13,7 @@ const fileMode = 644 /* chmod param for ordinary file */
 function deb (files, pkg, cb) {
   let ctrl = []
   for (let key in pkg) {
-    ctrl.push(`${titleCase(key)}: ${pkg[key]}`)
+    ctrl.push(`${titleCase(key).replace(' ', '-')}: ${pkg[key]}`)
   }
   ctrl.push(' ')
   return cb(null, ctrl)
