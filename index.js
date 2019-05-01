@@ -3,6 +3,7 @@
 const gutil = require('gulp-util')
 const through = require('through2')
 const titleCase = require('title-case')
+const path = require('path')
 const fs = require('fs-extra')
 const _exec = require('child_process').exec
 
@@ -15,8 +16,28 @@ function deb (files, pkg, cb) {
   for (let key in pkg) {
     ctrl.push(`${titleCase(key).replace(' ', '-')}: ${pkg[key]}`)
   }
+  ctrl.push(`Installed-Size: ${Math.ceil(calculateSize(files))}`);
   ctrl.push(' ')
   return cb(null, ctrl)
+}
+
+// The disk space is given as the integer value of the estimated installed size
+// in bytes, divided by 1024 and rounded up.
+// https://www.debian.org/doc/debian-policy/ch-controlfields.html#installed-size
+function calculateSize (files) {
+  return files.reduce(function (size, file) {
+    let fileSize = file.stat.size / 1024;
+    if (file.stat.isDirectory()) {
+      fileSize = calculateSize(fs.readdirSync(file.path).map(function (filename) {
+        const fullPath = path.join(file.path, filename);
+        return {
+          path: fullPath,
+          stat: fs.statSync(fullPath)
+        }
+      }))
+    }
+    return size + fileSize;
+  }, 0)
 }
 
 function changelog (pkg) {
