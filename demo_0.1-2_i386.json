@@ -17,6 +17,7 @@
             "distribution": "unstable",
             "urgency": "low",
             "date": "2016-12-24T12:40:10",
+            "author": "Dr. No <no@nowhere.tld>",
             "changes": [
                 "Added another feature.",
                 "Fixed feature X."
