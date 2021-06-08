@@ -117,6 +117,9 @@ function installCopyright (pn, path, out, cb) {
 }
 
 function installConffiles (path, out, cb) {
+  if (path === undefined) {
+    return
+  }
   var conffiles = []
   var files = find.fileSync(path)
   path = path.replace(/\/$/, '')
