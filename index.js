@@ -5,6 +5,7 @@ const through = require('through2')
 const titleCase = require('title-case')
 const path = require('path')
 const fs = require('fs-extra')
+const find = require('find')
 const _exec = require('child_process').exec
 
 const P = 'gulp-debian'
@@ -115,6 +116,22 @@ function installCopyright (pn, path, out, cb) {
   }
 }
 
+function installConffiles (path, out, cb) {
+  var conffiles = []
+  var files = find.fileSync(path)
+  path = path.replace(/\/$/, '')
+  files.forEach(function (item) {
+    let pathDest = item.split('/').slice(path.split('/').length)
+    fs.copySync(item, `${out}/${pathDest.join('/')}`)
+    fs.chmodSync(`${out}/${pathDest.join('/')}`, parseInt(`0${fileMode}`, 8))
+    pathDest = '/' + pathDest.join('/')
+    conffiles.push(pathDest)
+  })
+  conffiles.push('')
+  fs.outputFileSync(`${out}/DEBIAN/conffiles`, conffiles.join('\n'))
+  fs.chmodSync(`${out}/DEBIAN/conffiles`, parseInt(`0${fileMode}`, 8))
+}
+
 function chmodRegularFile (path, cb) {
   if (fs.statSync(path).isFile()) {
     fs.chmodSync(path, parseInt(`0${fileMode}`, 8))
@@ -161,8 +178,9 @@ module.exports = function (pkg) {
       installScript('prerm', pkg.prerm, out, cb)
       installScript('postrm', pkg.postrm, out, cb)
       installCopyright(pkg.package, pkg._copyright, out, cb)
+      installConffiles(pkg.conffiles, out, cb)
       ctrl = ctrl.filter(function (line) {
-        if (!/Out|Target|Verbose|Changelog|Preinst|Postinst|Prerm|Postrm|Clean|Copyright/.test(line)) {
+        if (!/Out|Target|Verbose|Changelog|Preinst|Postinst|Prerm|Postrm|Clean|Copyright|Conffiles/.test(line)) {
           return line
         }
       })
